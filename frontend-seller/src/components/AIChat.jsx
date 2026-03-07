@@ -110,14 +110,13 @@ function AIChat({ productContext, onComplete }) {
     <div className="ai-chat">
       <div className="chat-header">
         <div className="chat-title">
-          <span className="chat-icon">💬</span>
           <div>
             <h3>AI Product Assistant</h3>
             <p>Gathering additional details for FAQs and customer support</p>
           </div>
         </div>
         <button className="skip-btn" onClick={handleSkip}>
-          Skip for now →
+          Skip for now
         </button>
       </div>
 
@@ -134,8 +133,8 @@ function AIChat({ productContext, onComplete }) {
 
         {messages.map((msg, index) => (
           <div key={index} className={`message ${msg.role}`}>
-            <div className="message-avatar">
-              {msg.role === 'assistant' ? '🤖' : '👤'}
+            <div className="message-avatar" aria-hidden="true">
+              {msg.role === 'assistant' ? 'AI' : 'You'}
             </div>
             <div className="message-content">
               <p>{msg.content}</p>
@@ -148,7 +147,7 @@ function AIChat({ productContext, onComplete }) {
 
         {isLoading && (
           <div className="message assistant">
-            <div className="message-avatar">🤖</div>
+            <div className="message-avatar" aria-hidden="true">AI</div>
             <div className="message-content">
               <div className="typing-indicator">
                 <span></span>
@@ -183,13 +182,13 @@ function AIChat({ productContext, onComplete }) {
       {messages.length >= 4 && (
         <div className="chat-actions">
           <button className="continue-btn" onClick={handleSkip}>
-            ✓ Done - Continue to Preview
+            Done - Continue to Preview
           </button>
         </div>
       )}
 
       <div className="chat-footer">
-        <p>💡 Tip: This information helps create better FAQs and customer support</p>
+        <p>Tip: This information helps create better FAQs and customer support</p>
       </div>
     </div>
   )

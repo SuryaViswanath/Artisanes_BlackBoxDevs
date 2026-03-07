@@ -48,6 +48,17 @@ aws dynamodb create-table \
   --region us-east-1
 ```
 
+Create users table (for JWT auth; partition key = email):
+
+```bash
+aws dynamodb create-table \
+  --table-name artisan-users \
+  --attribute-definitions AttributeName=email,AttributeType=S \
+  --key-schema AttributeName=email,KeyType=HASH \
+  --billing-mode PAY_PER_REQUEST \
+  --region us-east-1
+```
+
 ### 3. IAM User & Permissions
 
 Create an IAM user with programmatic access and attach the following policies:
@@ -88,6 +99,7 @@ AWS_SECRET_ACCESS_KEY=your_secret_key_here
 S3_BUCKET_NAME=artisan-marketplace-media
 DYNAMODB_PRODUCTS_TABLE=artisan-products
 DYNAMODB_CONVERSATIONS_TABLE=artisan-conversations
+DYNAMODB_USERS_TABLE=artisan-users
 BEDROCK_MODEL_ID=anthropic.claude-3-haiku-20240307-v1:0
 ```
 

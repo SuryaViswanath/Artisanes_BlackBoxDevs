@@ -1,13 +1,14 @@
 import express from 'express';
 import multer from 'multer';
+import { requireAuth } from '../middleware/auth.js';
 import { uploadToS3 } from '../services/s3.js';
 import { transcribeAudio } from '../services/transcribe.js';
 import { generateListing } from '../services/bedrock.js';
 import { saveProduct } from '../services/dynamodb.js';
-import { updateSellerProductCount } from '../services/sellers.js';
 import { v4 as uuidv4 } from 'uuid';
 
 const router = express.Router();
+router.use(requireAuth);
 
 // Configure multer for memory storage
 const upload = multer({ 
@@ -26,7 +27,6 @@ router.post('/generate-listing', upload.fields([
     const productId = uuidv4();
     const photos = req.files['photos'] || [];
     const voice = req.files['voice'] ? req.files['voice'][0] : null;
-    const sellerId = req.body.sellerId; // Get seller ID from request
 
     if (photos.length === 0) {
       return res.status(400).json({ error: 'At least one photo is required' });
@@ -34,10 +34,6 @@ router.post('/generate-listing', upload.fields([
 
     if (!voice) {
       return res.status(400).json({ error: 'Voice note is required' });
-    }
-
-    if (!sellerId) {
-      return res.status(400).json({ error: 'Seller ID is required' });
     }
 
     // Upload photos to S3
@@ -66,19 +62,15 @@ router.post('/generate-listing', upload.fields([
     // Save product to DynamoDB
     const product = {
       productId,
-      sellerId,
       photoUrls,
       voiceUrl,
       transcription,
       listing,
       createdAt: new Date().toISOString(),
-      status: 'published'  // Auto-publish for POC
+      status: 'draft'
     };
 
     await saveProduct(product);
-    
-    // Update seller's product count
-    await updateSellerProductCount(sellerId, 1);
 
     res.json({
       success: true,

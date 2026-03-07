@@ -21,8 +21,8 @@ export const s3Client = new S3Client({
   credentials: awsCredentials,
 });
 
-// DynamoDB Client
-const dynamoClient = new DynamoDBClient({
+// DynamoDB Client (raw client for CreateTable/DescribeTable; docClient for items)
+export const dynamoClient = new DynamoDBClient({
   region: AWS_REGION,
   credentials: awsCredentials,
 });
@@ -39,5 +39,6 @@ export const config = {
   s3BucketName: process.env.S3_BUCKET_NAME,
   productsTable: process.env.DYNAMODB_PRODUCTS_TABLE,
   conversationsTable: process.env.DYNAMODB_CONVERSATIONS_TABLE,
+  usersTable: process.env.DYNAMODB_USERS_TABLE,
   bedrockModelId: process.env.BEDROCK_MODEL_ID,
 };

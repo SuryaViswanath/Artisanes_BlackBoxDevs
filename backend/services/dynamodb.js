@@ -52,22 +52,3 @@ export async function getAllProducts() {
     throw new Error(`Failed to get products: ${error.message}`);
   }
 }
-
-
-export async function getProductsBySeller(sellerId) {
-  try {
-    const command = new ScanCommand({
-      TableName: config.productsTable,
-      FilterExpression: 'sellerId = :sellerId',
-      ExpressionAttributeValues: {
-        ':sellerId': sellerId
-      }
-    });
-
-    const response = await docClient.send(command);
-    return response.Items || [];
-  } catch (error) {
-    console.error('DynamoDB get seller products error:', error);
-    return [];
-  }
-}
