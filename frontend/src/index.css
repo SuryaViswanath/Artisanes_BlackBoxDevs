@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-page-bg antialiased;
+  }
+  #root {
+    @apply min-h-screen;
+  }
+}
+
+/* Seller / onboarding overrides */
+input, textarea, select {
+  font-family: inherit;
+}
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: none;
+}
