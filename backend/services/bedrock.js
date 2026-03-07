@@ -63,9 +63,6 @@ Be authentic, highlight the handmade nature, and optimize for Amazon search.`;
     const isClaude = config.bedrockModelId.includes('anthropic');
     const isTitan = config.bedrockModelId.includes('titan');
     const isNova = config.bedrockModelId.includes('nova');
-    const isLlama = config.bedrockModelId.includes('llama');
-    const isDeepSeek = config.bedrockModelId.includes('deepseek');
-    const isQwen = config.bedrockModelId.includes('qwen');
     
     let requestBody;
     if (isClaude) {
@@ -90,6 +87,7 @@ Be authentic, highlight the handmade nature, and optimize for Amazon search.`;
         }
       };
     } else if (isNova) {
+      // Nova uses the same format as Claude (Messages API)
       requestBody = {
         messages: [
           {
@@ -101,27 +99,6 @@ Be authentic, highlight the handmade nature, and optimize for Amazon search.`;
           maxTokens: 2000,
           temperature: 0.7
         }
-      };
-    } else if (isQwen) {
-      // Qwen uses messages format like Claude
-      requestBody = {
-        messages: [
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        max_tokens: 2000,
-        temperature: 0.7,
-        top_p: 0.9
-      };
-    } else if (isLlama || isDeepSeek) {
-      // Llama and DeepSeek use simple prompt format
-      requestBody = {
-        prompt: prompt,
-        max_gen_len: 2000,
-        temperature: 0.7,
-        top_p: 0.9
       };
     }
     
@@ -143,10 +120,6 @@ Be authentic, highlight the handmade nature, and optimize for Amazon search.`;
       textContent = responseBody.results[0].outputText;
     } else if (isNova) {
       textContent = responseBody.output.message.content[0].text;
-    } else if (isQwen) {
-      textContent = responseBody.choices[0].message.content;
-    } else if (isLlama || isDeepSeek) {
-      textContent = responseBody.generation;
     }
     
     // Parse the JSON from the response - use a more robust approach
@@ -212,11 +185,11 @@ function generateMockListing(transcription) {
   return {
     title: `Handcrafted ${productType} - Traditional Artisan Made`,
     bulletPoints: [
-      '✓ 100% Handmade by skilled artisan using traditional techniques',
-      '✓ Made from natural, eco-friendly materials sourced locally',
-      '✓ Each piece is unique with its own character and charm',
-      '✓ Perfect for home decor or as a thoughtful gift',
-      '✓ Supports local artisans and preserves traditional crafts'
+      '100% Handmade by skilled artisan using traditional techniques',
+      'Made from natural, eco-friendly materials sourced locally',
+      'Each piece is unique with its own character and charm',
+      'Perfect for home decor or as a thoughtful gift',
+      'Supports local artisans and preserves traditional crafts'
     ],
     description: `This beautiful ${productType.toLowerCase()} is handcrafted with care and attention to detail. ${transcription.substring(0, 200)}... Each piece tells a story of traditional craftsmanship passed down through generations. The artisan uses time-honored techniques to create products that are not only functional but also works of art. By purchasing this item, you're supporting local artisans and helping preserve traditional craft techniques.`,
     tags: [
@@ -263,9 +236,6 @@ If the artisan has provided enough information, summarize what you've learned an
     const isClaude = config.bedrockModelId.includes('anthropic');
     const isTitan = config.bedrockModelId.includes('titan');
     const isNova = config.bedrockModelId.includes('nova');
-    const isLlama = config.bedrockModelId.includes('llama');
-    const isDeepSeek = config.bedrockModelId.includes('deepseek');
-    const isQwen = config.bedrockModelId.includes('qwen');
     
     let requestBody;
     if (isClaude) {
@@ -290,6 +260,7 @@ If the artisan has provided enough information, summarize what you've learned an
         }
       };
     } else if (isNova) {
+      // Nova uses the same format as Claude (Messages API)
       requestBody = {
         messages: [
           {
@@ -301,27 +272,6 @@ If the artisan has provided enough information, summarize what you've learned an
           maxTokens: 500,
           temperature: 0.8
         }
-      };
-    } else if (isLlama || isDeepSeek) {
-      // Llama and DeepSeek use simple prompt format
-      requestBody = {
-        prompt: systemPrompt,
-        max_gen_len: 500,
-        temperature: 0.8,
-        top_p: 0.9
-      };
-    } else if (isQwen) {
-      // Qwen uses messages format like Claude
-      requestBody = {
-        messages: [
-          {
-            role: 'user',
-            content: systemPrompt
-          }
-        ],
-        max_tokens: 500,
-        temperature: 0.8,
-        top_p: 0.9
       };
     }
     
@@ -343,10 +293,6 @@ If the artisan has provided enough information, summarize what you've learned an
       aiResponse = responseBody.results[0].outputText;
     } else if (isNova) {
       aiResponse = responseBody.output.message.content[0].text;
-    } else if (isQwen) {
-      aiResponse = responseBody.choices[0].message.content;
-    } else if (isLlama || isDeepSeek) {
-      aiResponse = responseBody.generation;
     }
 
     console.log('AI chat response:', aiResponse);
@@ -382,150 +328,5 @@ function generateMockChatResponse(conversationHistory, userMessage) {
   return {
     response: "Perfect! I have all the information I need. This will help create comprehensive FAQs and provide great customer support. Thank you!",
     success: true
-  };
-}
-
-
-export async function generateSellerProfile(conversationHistory, userMessage, questionsAsked) {
-  const systemPrompt = `You are a friendly AI assistant helping an artisan create their seller profile. Your goal is to learn about:
-- Their craft and what they make
-- Their inspiration and story
-- Their techniques and materials
-- Their experience and background
-- What makes their work unique
-
-CONVERSATION SO FAR:
-${conversationHistory.map(msg => `${msg.role}: ${msg.content}`).join('\n')}
-
-USER MESSAGE: ${userMessage}
-
-Based on the conversation, ask ONE follow-up question to learn more. Be warm, encouraging, and genuinely interested.
-
-After ${5 - questionsAsked} more questions, you'll have enough information.
-
-${questionsAsked >= 4 ? 'This should be your last question. After this, summarize what you learned and thank them.' : ''}
-
-Respond naturally and conversationally.`;
-
-  try {
-    const isClaude = config.bedrockModelId.includes('anthropic');
-    const isTitan = config.bedrockModelId.includes('titan');
-    const isNova = config.bedrockModelId.includes('nova');
-    const isQwen = config.bedrockModelId.includes('qwen');
-    const isLlama = config.bedrockModelId.includes('llama');
-    const isDeepSeek = config.bedrockModelId.includes('deepseek');
-    
-    let requestBody;
-    if (isClaude) {
-      requestBody = {
-        anthropic_version: 'bedrock-2023-05-31',
-        max_tokens: 300,
-        messages: [{ role: 'user', content: systemPrompt }],
-        temperature: 0.8
-      };
-    } else if (isTitan) {
-      requestBody = {
-        inputText: systemPrompt,
-        textGenerationConfig: { maxTokenCount: 300, temperature: 0.8, topP: 0.9 }
-      };
-    } else if (isNova) {
-      requestBody = {
-        messages: [{ role: 'user', content: [{ text: systemPrompt }] }],
-        inferenceConfig: { maxTokens: 300, temperature: 0.8 }
-      };
-    } else if (isQwen) {
-      requestBody = {
-        messages: [{ role: 'user', content: systemPrompt }],
-        max_tokens: 300,
-        temperature: 0.8,
-        top_p: 0.9
-      };
-    } else if (isLlama || isDeepSeek) {
-      requestBody = {
-        prompt: systemPrompt,
-        max_gen_len: 300,
-        temperature: 0.8,
-        top_p: 0.9
-      };
-    }
-    
-    const command = new InvokeModelCommand({
-      modelId: config.bedrockModelId,
-      contentType: 'application/json',
-      accept: 'application/json',
-      body: JSON.stringify(requestBody)
-    });
-
-    const response = await bedrockClient.send(command);
-    const responseBody = JSON.parse(new TextDecoder().decode(response.body));
-    
-    let aiResponse;
-    if (isClaude) {
-      aiResponse = responseBody.content[0].text;
-    } else if (isTitan) {
-      aiResponse = responseBody.results[0].outputText;
-    } else if (isNova) {
-      aiResponse = responseBody.output.message.content[0].text;
-    } else if (isQwen) {
-      aiResponse = responseBody.choices[0].message.content;
-    } else if (isLlama || isDeepSeek) {
-      aiResponse = responseBody.generation;
-    }
-
-    // Extract profile data if conversation is complete
-    let profile = null;
-    if (questionsAsked >= 5) {
-      profile = extractProfileFromConversation(conversationHistory);
-    }
-
-    return { response: aiResponse, success: true, profile };
-
-  } catch (error) {
-    console.error('Profile AI error:', error);
-    return generateMockProfileResponse(questionsAsked);
-  }
-}
-
-function extractProfileFromConversation(messages) {
-  // Extract key information from conversation
-  const userMessages = messages.filter(m => m.role === 'user').map(m => m.content).join(' ');
-  
-  return {
-    story: userMessages.substring(0, 500),
-    craftType: 'Handcrafted Products',
-    experience: 'Experienced Artisan',
-    techniques: 'Traditional handcrafting techniques',
-    materials: 'Natural and sustainable materials',
-    inspiration: 'Passion for preserving traditional crafts',
-    updatedAt: new Date().toISOString()
-  };
-}
-
-function generateMockProfileResponse(questionsAsked) {
-  const questions = [
-    "That sounds wonderful! How long have you been practicing your craft?",
-    "Fascinating! What materials do you typically work with, and why do you choose them?",
-    "I'd love to know more about your creative process. How do you approach creating a new piece?",
-    "What do you think makes your work unique compared to mass-produced items?",
-    "Perfect! One last thing - what do you hope customers feel when they receive your products?"
-  ];
-
-  if (questionsAsked < questions.length) {
-    return {
-      response: questions[questionsAsked],
-      success: true,
-      profile: null
-    };
-  }
-
-  return {
-    response: "Thank you so much for sharing your story! Your passion really shines through. This will help create authentic listings that connect with customers.",
-    success: true,
-    profile: {
-      story: 'Passionate artisan dedicated to traditional craftsmanship',
-      craftType: 'Handcrafted Products',
-      experience: 'Experienced Artisan',
-      updatedAt: new Date().toISOString()
-    }
   };
 }

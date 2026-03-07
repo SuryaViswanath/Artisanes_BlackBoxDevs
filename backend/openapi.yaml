@@ -1,0 +1,482 @@
+openapi: 3.0.3
+info:
+  title: Artisan Marketplace Backend API
+  description: API for the Artisan Marketplace - seller registration, products, uploads, and AI conversation.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3001
+    description: Local development
+
+tags:
+  - name: Health
+    description: Service health
+  - name: Auth
+    description: JWT authentication (email/password)
+  - name: Products
+    description: Product catalog
+  - name: Upload
+    description: Photo/voice upload and listing generation
+  - name: Conversation
+    description: AI conversation for product details
+
+paths:
+  /api/health:
+    get:
+      tags: [Health]
+      summary: Health check
+      operationId: getHealth
+      responses:
+        '200':
+          description: Backend is running
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /api/auth:
+    get:
+      tags: [Auth]
+      summary: List auth routes
+      description: Returns available auth endpoint names (sanity check that auth is loaded).
+      operationId: getAuthRoutes
+      responses:
+        '200':
+          description: Auth module loaded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean, example: true }
+                  routes:
+                    type: array
+                    items: { type: string }
+                    example: ['session', 'login', 'logout']
+
+  /api/auth/ping:
+    get:
+      tags: [Auth]
+      summary: Auth ping
+      operationId: getAuthPing
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean, example: true }
+
+  /api/auth/session:
+    get:
+      tags: [Auth]
+      summary: Get current session
+      description: Send JWT in Authorization header (Bearer token). Returns user if valid.
+      operationId: getSession
+      security: []
+      responses:
+        '200':
+          description: Session state
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SessionResponse' }
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /api/auth/register:
+    post:
+      tags: [Auth]
+      summary: Register
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, minLength: 6 }
+                name: { type: string }
+                role: { type: string, enum: [seller, buyer], default: seller }
+      responses:
+        '201':
+          description: Created; returns user and token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  user: { $ref: '#/components/schemas/User' }
+                  token: { type: string, description: JWT }
+        '400':
+          description: Email and password required
+        '409':
+          description: Email already exists
+        '500':
+          description: Server error
+
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Login (email + password)
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string }
+      responses:
+        '200':
+          description: Success; returns user and token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  user: { $ref: '#/components/schemas/User' }
+                  token: { type: string, description: JWT }
+        '401':
+          description: Invalid email or password
+        '500':
+          description: Server error
+
+  /api/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Logout
+      operationId: logout
+      responses:
+        '200':
+          description: Logged out successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: true }
+                  message: { type: string, example: 'Logged out successfully' }
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /api/products:
+    get:
+      tags: [Products]
+      summary: List all products
+      operationId: listProducts
+      responses:
+        '200':
+          description: List of published products (or mock on DB failure)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  products:
+                    type: array
+                    items: { $ref: '#/components/schemas/Product' }
+                  count: { type: integer }
+                  note:
+                    type: string
+                    description: Present when using mock data
+
+  /api/products/{id}:
+    get:
+      tags: [Products]
+      summary: Get product by ID
+      operationId: getProduct
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Product found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  product: { $ref: '#/components/schemas/Product' }
+        '404':
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: { type: string, example: 'Product not found' }
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /api/upload/generate-listing:
+    post:
+      tags: [Upload]
+      summary: Generate listing from photos and voice
+      description: |
+        Upload up to 3 photos and 1 voice note (multipart/form-data).
+        Photos are uploaded to S3, voice is transcribed, and Bedrock AI generates a listing.
+        Product is saved as draft in DynamoDB.
+      operationId: generateListing
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [photos, voice]
+              properties:
+                photos:
+                  type: array
+                  items: { type: string, format: binary }
+                  minItems: 1
+                  maxItems: 3
+                  description: Product images (required, 1-3 files)
+                voice:
+                  type: string
+                  format: binary
+                  description: Voice note (e.g. webm, required)
+      responses:
+        '200':
+          description: Listing generated and saved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  productId: { type: string, format: uuid }
+                  listing: { $ref: '#/components/schemas/ProductListing' }
+                  photoUrls:
+                    type: array
+                    items: { type: string, format: uri }
+        '400':
+          description: Validation error (e.g. missing photos or voice)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: { type: string }
+        '500':
+          description: Failed to generate listing
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /api/conversation/start:
+    post:
+      tags: [Conversation]
+      summary: Start a new conversation
+      operationId: startConversation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                productId: { type: string }
+                productContext: { type: string }
+      responses:
+        '200':
+          description: Conversation started; returns initial AI greeting
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  conversationId: { type: string, format: uuid }
+                  message: { type: string }
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /api/conversation/message:
+    post:
+      tags: [Conversation]
+      summary: Send a message and get AI response
+      operationId: sendMessage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [conversationId, message]
+              properties:
+                conversationId: { type: string, format: uuid }
+                message: { type: string }
+      responses:
+        '200':
+          description: AI response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  message: { type: string }
+                  conversationId: { type: string }
+        '400':
+          description: conversationId and message are required
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: { type: string }
+        '404':
+          description: Conversation not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: { type: string }
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /api/conversation/{conversationId}:
+    get:
+      tags: [Conversation]
+      summary: Get conversation by ID
+      operationId: getConversation
+      parameters:
+        - name: conversationId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Conversation with message history
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  conversation:
+                    $ref: '#/components/schemas/Conversation'
+        '404':
+          description: Conversation not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: { type: string }
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status: { type: string, example: 'ok' }
+        message: { type: string, example: 'Backend is running' }
+
+    SessionResponse:
+      type: object
+      properties:
+        success: { type: boolean }
+        loggedIn: { type: boolean }
+        user:
+          nullable: true
+          $ref: '#/components/schemas/User'
+
+    User:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        email: { type: string }
+
+    LoginResponse:
+      type: object
+      properties:
+        success: { type: boolean }
+        loggedIn: { type: boolean }
+        user: { $ref: '#/components/schemas/User' }
+
+    ErrorResponse:
+      type: object
+      properties:
+        success: { type: boolean }
+        error: { type: string }
+        message: { type: string }
+
+    Product:
+      type: object
+      properties:
+        productId: { type: string }
+        listing: { $ref: '#/components/schemas/ProductListing' }
+        photoUrls:
+          type: array
+          items: { type: string, format: uri }
+        voiceUrl: { type: string, format: uri }
+        transcription: { type: string }
+        status: { type: string, enum: [draft, published] }
+        createdAt: { type: string, format: date-time }
+        amazonUrl: { type: string, format: uri }
+
+    ProductListing:
+      type: object
+      properties:
+        title: { type: string }
+        description: { type: string }
+        bulletPoints:
+          type: array
+          items: { type: string }
+        tags:
+          type: array
+          items: { type: string }
+        category: { type: string }
+        storyCard: { type: string }
+
+    Conversation:
+      type: object
+      properties:
+        conversationId: { type: string }
+        productId: { type: string }
+        productContext: { type: string }
+        messages:
+          type: array
+          items:
+            type: object
+            properties:
+              role: { type: string, enum: [user, assistant] }
+              content: { type: string }
+              timestamp: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }

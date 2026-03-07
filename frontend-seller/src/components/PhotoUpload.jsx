@@ -50,7 +50,16 @@ function PhotoUpload({ onPhotosUploaded }) {
   return (
     <div className="photo-upload">
       <h2>Upload Product Photos</h2>
-      <p className="subtitle">Add 2-3 clear photos of your product</p>
+      <p className="subtitle">
+        Add 2-3 clear photos of your product
+        <span
+          className="field-tooltip"
+          aria-label="Photos should be well lit, in focus, and show the product clearly."
+          title="Use bright, even lighting and avoid cluttered backgrounds."
+        >
+          ?
+        </span>
+      </p>
 
       <div className="photo-grid">
         {previews.map((preview, index) => (
@@ -70,7 +79,6 @@ function PhotoUpload({ onPhotosUploaded }) {
             className="photo-upload-box"
             onClick={() => fileInputRef.current?.click()}
           >
-            <div className="upload-icon">📷</div>
             <p>Click to upload</p>
             <span className="upload-hint">JPEG or PNG</span>
           </div>
@@ -101,7 +109,7 @@ function PhotoUpload({ onPhotosUploaded }) {
         onClick={handleContinue}
         disabled={photos.length === 0}
       >
-        Continue to Voice Note →
+        Continue to Voice Note
       </button>
     </div>
   )

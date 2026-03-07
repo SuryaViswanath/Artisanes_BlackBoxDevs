@@ -35,7 +35,7 @@ function ListingPreview({ listing, photos, onBack }) {
 
         <div className="preview-content">
           <div className="amazon-badge">
-            <span>🛒</span> Amazon Listing
+            Amazon Listing
           </div>
 
           <h3 className="product-title">{listing.title}</h3>
@@ -75,7 +75,7 @@ function ListingPreview({ listing, photos, onBack }) {
 
           {listing.storyCard && (
             <div className="story-card">
-              <h4>✨ Artisan Story:</h4>
+              <h4>Artisan Story:</h4>
               <p>{listing.storyCard}</p>
             </div>
           )}
@@ -103,20 +103,20 @@ function ListingPreview({ listing, photos, onBack }) {
 
       <div className="preview-actions">
         <button className="back-btn" onClick={onBack} disabled={isPublishing}>
-          ← Edit
+          Back to Edit
         </button>
         <button 
           className={`publish-btn ${published ? 'published' : ''}`}
           onClick={handlePublish}
           disabled={isPublishing || published}
         >
-          {isPublishing ? '⏳ Publishing...' : published ? '✓ Published' : '🚀 Publish to Amazon'}
+          {isPublishing ? 'Publishing...' : published ? 'Published' : 'Publish to Amazon'}
         </button>
       </div>
 
       {published && (
         <div className="success-message">
-          <p>✅ Your listing is now live on Amazon!</p>
+          <p>Your listing is now live on Amazon!</p>
           <p className="note">Note: This is a POC. Real Amazon SP-API integration coming soon.</p>
         </div>
       )}

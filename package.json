@@ -12,7 +12,9 @@
     "install:all": "npm install && cd frontend-seller && npm install && cd ../frontend-buyer && npm install && cd ../backend && npm install",
     "dev:seller": "cd frontend-seller && npm run dev",
     "dev:buyer": "cd frontend-buyer && npm run dev",
-    "dev:backend": "cd backend && npm run dev",
+    "dev:backend": "cd backend && node server.js",
+    "backend": "cd backend && node server.js",
+    "backend:restart": "lsof -ti:3001 | xargs kill -9 2>/dev/null; npm run backend",
     "build:all": "cd frontend-seller && npm run build && cd ../frontend-buyer && npm run build"
   },
   "keywords": ["artisan", "marketplace", "ai", "aws", "bedrock"],

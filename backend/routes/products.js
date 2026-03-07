@@ -61,11 +61,11 @@ function generateMockProducts() {
         title: 'Handcrafted Traditional Clay Pot - Natural Red Clay Water Storage',
         description: 'This beautiful clay pot is handcrafted using traditional pottery techniques passed down through generations. Made from natural red clay sourced from local riverbanks, each piece is unique and perfect for storing water naturally.',
         bulletPoints: [
-          '✓ 100% Handmade using traditional pottery wheel techniques',
-          '✓ Made from natural red clay sourced locally',
-          '✓ Perfect for natural water storage - keeps water cool',
-          '✓ Each piece unique with 3 hours of dedicated craftsmanship',
-          '✓ Eco-friendly and supports traditional artisans'
+          '100% Handmade using traditional pottery wheel techniques',
+          'Made from natural red clay sourced locally',
+          'Perfect for natural water storage - keeps water cool',
+          'Each piece unique with 3 hours of dedicated craftsmanship',
+          'Eco-friendly and supports traditional artisans'
         ],
         tags: ['handmade', 'clay-pot', 'traditional', 'pottery', 'eco-friendly'],
         category: 'Home & Kitchen',
@@ -85,11 +85,11 @@ function generateMockProducts() {
         title: 'Handwoven Cotton Table Runner - Natural Dyes Traditional Textile',
         description: 'Beautiful handwoven table runner crafted on a traditional loom using 100% cotton threads and natural plant-based dyes. Each piece takes 2 weeks to complete and showcases intricate patterns.',
         bulletPoints: [
-          '✓ Handwoven on traditional loom with 100% cotton',
-          '✓ Natural plant-based dyes - eco-friendly colors',
-          '✓ Intricate traditional patterns unique to each piece',
-          '✓ 2 weeks of dedicated craftsmanship',
-          '✓ Perfect for dining table or wall hanging'
+          'Handwoven on traditional loom with 100% cotton',
+          'Natural plant-based dyes - eco-friendly colors',
+          'Intricate traditional patterns unique to each piece',
+          '2 weeks of dedicated craftsmanship',
+          'Perfect for dining table or wall hanging'
         ],
         tags: ['handwoven', 'textile', 'cotton', 'natural-dyes', 'table-runner'],
         category: 'Home Décor',
@@ -109,11 +109,11 @@ function generateMockProducts() {
         title: 'Handcrafted Silver Necklace - Semi-Precious Stones Artisan Jewelry',
         description: 'Elegant handcrafted necklace featuring sterling silver and semi-precious stones. Each link is hand-forged using traditional metalworking techniques, creating a unique piece of wearable art.',
         bulletPoints: [
-          '✓ Sterling silver hand-forged with traditional techniques',
-          '✓ Semi-precious stones carefully selected and set',
-          '✓ Adjustable length for perfect fit',
-          '✓ Comes in beautiful gift box',
-          '✓ Each piece is one-of-a-kind'
+          'Sterling silver hand-forged with traditional techniques',
+          'Semi-precious stones carefully selected and set',
+          'Adjustable length for perfect fit',
+          'Comes in beautiful gift box',
+          'Each piece is one-of-a-kind'
         ],
         tags: ['handmade', 'jewelry', 'silver', 'necklace', 'artisan'],
         category: 'Jewelry',
