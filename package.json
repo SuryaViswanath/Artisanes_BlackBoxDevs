@@ -1,0 +1,21 @@
+{
+  "name": "artisan-marketplace-poc",
+  "version": "1.0.0",
+  "description": "AI-powered marketplace assistant for local artisans - POC",
+  "private": true,
+  "workspaces": [
+    "frontend-seller",
+    "frontend-buyer",
+    "backend"
+  ],
+  "scripts": {
+    "install:all": "npm install && cd frontend-seller && npm install && cd ../frontend-buyer && npm install && cd ../backend && npm install",
+    "dev:seller": "cd frontend-seller && npm run dev",
+    "dev:buyer": "cd frontend-buyer && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "build:all": "cd frontend-seller && npm run build && cd ../frontend-buyer && npm run build"
+  },
+  "keywords": ["artisan", "marketplace", "ai", "aws", "bedrock"],
+  "author": "",
+  "license": "MIT"
+}
