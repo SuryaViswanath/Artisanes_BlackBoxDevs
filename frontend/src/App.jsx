@@ -126,7 +126,7 @@ function App() {
                   </GuestRoute>
                 }
               />
-              <Route path="/seller" element={<SellerLanding />} />
+              <Route path="/seller" element={<SellerLanding user={user} />} />
               <Route
                 path="/seller/create"
                 element={
