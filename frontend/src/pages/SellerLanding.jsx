@@ -1,9 +1,32 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import './SellerLanding.css'
 
-function SellerLanding() {
+function SellerLanding({ user }) {
+  const navigate = useNavigate()
   const sellerAuthState = { from: '/seller/create', role: 'seller' }
+
+  // If user is already logged in, show a different message with a continue button
+  if (user) {
+    return (
+      <div className="landing-page">
+        <div className="onboarding-hero">
+          <h1 className="onboarding-title">Welcome back, {user.name || user.email}!</h1>
+          <p className="onboarding-subtitle">
+            You're all set to create your product listing.
+          </p>
+          <div className="landing-actions">
+            <button
+              onClick={() => navigate('/seller/create')}
+              className="primary-cta"
+            >
+              Create Product Listing
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="landing-page">
